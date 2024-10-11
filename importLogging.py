@@ -14,3 +14,4 @@ print('Connected! IP: ' + ipaddr)   # Need this to connect!!
 
 mip.install('logging')
 mip.install('time')
+mip.install('aioble')

@@ -1,6 +1,6 @@
 """
 
-    ESP32LogRecord
+    ESPLogRecord
     Modified logging.LogRecord for MicroPython that does the right thing to calculate the msecs :-)
 
 """
@@ -9,7 +9,7 @@ import time
 import logging
 from logging import LogRecord
 
-class ESP32LogRecord(LogRecord):
+class ESPLogRecord(LogRecord):
     def set(self, name, level, message):
         super().set(name, level, message)
         self.ct_ns = time.time_ns()
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     print("LogRecord:", type(logger.record))
     logger.info("before ESP32LogRecord")
 
-    logger.record = ESP32LogRecord()
+    logger.record = ESPLogRecord()
     print("Logger after:", logger)
     print("LogRecord:",type(logger.record))
     logger.info("after ESP32LogRecord")

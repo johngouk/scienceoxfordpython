@@ -25,8 +25,8 @@ import time, asyncio
 import logging
 
 logger = logging.getLogger(__name__)
-from ESP32LogRecord import ESP32LogRecord
-logger.record = ESP32LogRecord()
+from ESPLogRecord import ESPLogRecord
+logger.record = ESPLogRecord()
 
 from esp8266_i2c_lcd import I2cLcd
 
@@ -63,4 +63,32 @@ class LCD(I2cLcd):
             self.move_to(0,1) # use second row
             self.putstr(line1())
             await asyncio.sleep(interval)
-        
+
+async def main():
+    import random
+    def line0():
+        return time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
+    
+    def line1():
+        return str(random.randint(1,10000))
+    
+    asyncio.create_task(lcd.updateLCD(5, line0, line1))
+    while True:
+        logger.info("LCD test main looping...")
+        await asyncio.sleep(30)
+    
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
+    logger.info("Starting LCD Demo")
+    lcd = LCD() # Use the defaults
+    
+    lcd.putstr("Hi there!\nThis is an LCD")
+
+    # start asyncio task and loop
+    try:
+        # start the main async tasks
+        asyncio.run(main())
+    finally:
+        # reset and start a new event loop for the task scheduler
+        asyncio.new_event_loop()

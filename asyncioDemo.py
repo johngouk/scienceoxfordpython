@@ -1,16 +1,26 @@
-# asyncio demo
+"""
+
+    asyncio demo - should work on CPython and MicroPython, right??
+
+"""
 import time
 import asyncio
 import logging
 
+MP = False
+
 # micropython
-#from micropython import const
-#import network
-#import ntptime
+import sys
+if sys.implementation.name == "micropython":
+    MP = True
+    from micropython import const
+    import network
+    import ntptime
 
 logger = logging.getLogger(__name__)
-#from ESP32LogRecord import ESP32LogRecord
-#logger.record = ESP32LogRecord()
+if MP:
+    from ESPLogRecord import ESPLogRecord
+    logger.record = ESPLogRecord()
 
 #from WiFiConnection import WiFiConnection
 
