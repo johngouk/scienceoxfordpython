@@ -17,6 +17,7 @@ if sys.implementation.name == "micropython":
     import network
     import ntptime
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 if MP:
     from ESPLogRecord import ESPLogRecord
@@ -27,6 +28,7 @@ if MP:
 async def doSomething(interval, name):
     # Prints the message as a logger info every interval seconds
     logger = logging.getLogger(name)
+    logger.record = ESPLogRecord()
     while True:
         logger.info("%s every %d seconds" % (name, interval))
         await asyncio.sleep(interval)
@@ -50,7 +52,6 @@ async def main():
         await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
     
     # start asyncio task and loop
     try:

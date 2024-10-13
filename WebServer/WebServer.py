@@ -1,9 +1,9 @@
-import asyncio, time, gc, random, logging
+import asyncio, time, random, logging
 from micropython import const
 
 logger = logging.getLogger(__name__)
-from ESP32LogRecord import ESP32LogRecord
-logger.record = ESP32LogRecord()
+from ESPLogRecord import ESPLogRecord
+logger.record = ESPLogRecord()
 
 
 from RequestParser import RequestParser
@@ -19,10 +19,15 @@ from ResponseBuilder import ResponseBuilder
 
 """
 
+def getValues():
+    return {"temp0":random.uniform(40,65), "temp1":random.uniform(40,65)}
+
 class WebServer:
     
-    def __init__(self):
-        logger.info(const("initialising"))
+    def __init__(self, dataSources=getValues, docroot="/"):
+        logger.info(const("initialising: Data Sources: %s"), dataSources)
+        self.dataSources = dataSources
+        self.docroot = docroot
 
     def run(self):
         server = asyncio.start_server(self.handle_request, "0.0.0.0", 80)        
@@ -39,16 +44,43 @@ class WebServer:
             
             request = RequestParser(raw_request)
             
-            logger.debug(const("Request Info: t: %d client: %s method: %s action: %s URL: %s"),
+            logger.debug("Request:\n%s", raw_request)
+            
+            logger.info(const("Request Info: t: %d client: %s method: %s action: %s URL: %s"),
                          time.time(), peerInfo, request.method, request.get_action(),
                          request.full_url)
             
-            response_builder = ResponseBuilder()
+            response_builder = ResponseBuilder(self.docroot)
 
             # filter out api request
+            if request.url_match("/api"):
+                action = request.get_action()
+                if action == 'readData':
+                    # ajax request for data
+                    response_obj = {
+                        'status': 0
+                        }
+                    for d in self.dataSources:
+                        values = d()
+                        response_obj.update(values)
+                    response_builder.set_body_from_dict(response_obj)
+                    logger.debug(const("Response Body: %s"), response_builder.body)
+                    del response_obj
+                elif False:
+                    pass
+                else:
+                    # unknown action
+                    response_builder.set_status(404)
+
+                # response_builder.serve_static_file(request.url, "/api_index.html")
             # try to serve static file
-            # ResponseBulider checks it all out...
-            response_builder.serve_static_file(request.url, "/index.html")
+            else:
+                # ResponseBuilder checks it all out...
+                response_builder.serve_static_file(request.url, "/index.html")
+            
+            if response_builder.status != 200:
+                logger.warning(const("Error %d on Request %s"), response_builder.status, raw_request)
+
             """
             try/except/finally to handle running out of Heap Memory error,
             largely alleviated now by the loop with a fixed length buffer read
@@ -80,9 +112,6 @@ class WebServer:
         except Exception as e:
             logger.error(const("Exception processing request: Client: %s Ex: %s err: %s"), peerInfo, str(e), str(e.errno))
 
-def getValues():
-    return {"temp0":45.3, "temp1":65}
-
 
 # Code to test as free-standing program
 async def main():
@@ -93,7 +122,7 @@ async def main():
         raise RuntimeError('network connection failed')
 
     logger.debug(const("Starting WebServer"))
-    ws = WebServer()
+    ws = WebServer([getValues])
     # start web server task
     ws.run()
     

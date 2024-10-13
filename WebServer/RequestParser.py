@@ -4,8 +4,8 @@ import json
 import logging
 
 logger = logging.getLogger(__name__)
-from ESP32LogRecord import ESP32LogRecord
-logger.record = ESP32LogRecord()
+from ESPLogRecord import ESPLogRecord
+logger.record = ESPLogRecord()
 
 
 class RequestParser:
@@ -159,6 +159,7 @@ class RequestParser:
 
             # save param in dictionary
             params[key] = value
+        logger.debug("Query params: %s", str(params))
         return params
 
     def parse_content_form_data(self):

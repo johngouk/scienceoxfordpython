@@ -6,7 +6,7 @@
 """
 
 import logging, ntptime, network
-import NetCreds
+from NetworkCredentials import NetworkCredentials
 from ESPLogRecord import ESPLogRecord
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
@@ -16,7 +16,7 @@ logger.info('Connecting to AP...')
 logger.info('Note that the time hasn\'t been set yet...')
 w = network.WLAN(network.STA_IF)
 w.active(True)
-w.connect(NetCreds.ssid, NetCreds.password)
+w.connect(NetworkCredentials.ssid, NetworkCredentials.password)
 while not (w.isconnected()):
     pass
 ipaddr = w.ifconfig()[0]
@@ -39,24 +39,25 @@ print('Logging level at DEBUG...')
 sendMessages()
 
 # Have to use force = TRUE to override the initial setting
-logging.basicConfig(level=logging.INFO, force=True, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
+logger.setLevel(logging.INFO)
 print('\nlogging level at INFO - no DEBUG shown')
 sendMessages()
 
-logging.basicConfig(level=logging.ERROR, force=True, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
+logger.setLevel(logging.ERROR)
 print('\nlogging level at ERROR - only ERROR messages shown')
 sendMessages()
 
-print('\nLet\'s change the LogRecord to one that sets up current time and msecs correctly, and try again')
+print('\nLet\'s change the LogRecord to one that sets up msecs correctly, and try again')
 logger.record = ESPLogRecord()
+logger.setLevel(logging.DEBUG)
 print('Logging level at DEBUG...')
 sendMessages()
 
-# Have to use force = TRUE to override the initial setting
-logging.basicConfig(level=logging.INFO, force=True, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
+logger.setLevel(logging.INFO)
 print('\nlogging level at INFO - no DEBUG shown')
 sendMessages()
 
+logger.setLevel(logging.ERROR)
 logging.basicConfig(level=logging.ERROR, force=True, format='%(asctime)s.%(msecs)06d %(levelname)s - %(name)s - %(message)s')
 print('\nlogging level at ERROR - only ERROR messages shown')
 sendMessages()

@@ -1,0 +1,3 @@
+# Smart(er) Web Server #
+
+This is intended to be an ESP-based web server with connected sensors, and LCD1602 and a website that displays the current sensor values in a rather cool gauge format. I will get it working properly in a bit...
